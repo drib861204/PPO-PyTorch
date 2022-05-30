@@ -6,22 +6,27 @@ from datetime import datetime
 import torch
 import numpy as np
 
-import gym
-import roboschool
+#import gym
+#import roboschool
 
 from PPO import PPO
+
+from Pendulum_v3 import *  # added by Ben
+import matplotlib.pyplot as plt
+
 
 ################################### Training ###################################
 def train():
     print("============================================================================================")
 
     ####### initialize environment hyperparameters ######
-    env_name = "RoboschoolWalker2d-v1"
+    #env_name = "RoboschoolWalker2d-v1"
+    env_name = "rwip"
 
     has_continuous_action_space = True  # continuous action space; else discrete
 
-    max_ep_len = 1000                   # max timesteps in one episode
-    max_training_timesteps = int(3e6)   # break training loop if timeteps > max_training_timesteps
+    max_ep_len = 500                    # max timesteps in one episode
+    max_training_timesteps = int(1e5)   # break training loop if timeteps > max_training_timesteps
 
     print_freq = max_ep_len * 10        # print avg reward in the interval (in num timesteps)
     log_freq = max_ep_len * 2           # log avg reward in the interval (in num timesteps)
@@ -48,9 +53,10 @@ def train():
     random_seed = 0         # set random seed if required (0 = no random seed)
     #####################################################
 
-    print("training environment name : " + env_name)
+    #print("training environment name : " + env_name)
 
-    env = gym.make(env_name)
+    #env = gym.make(env_name)
+    env = Pendulum(0)
 
     # state space dimension
     state_dim = env.observation_space.shape[0]
@@ -95,6 +101,8 @@ def train():
     if not os.path.exists(directory):
           os.makedirs(directory)
 
+    current_num_files = next(os.walk(directory))[2]
+    run_num_pretrained = len(current_num_files)
 
     checkpoint_path = directory + "PPO_{}_{}_{}.pth".format(env_name, random_seed, run_num_pretrained)
     print("save checkpoint path : " + checkpoint_path)
@@ -133,7 +141,7 @@ def train():
         print("--------------------------------------------------------------------------------------------")
         print("setting random seed to ", random_seed)
         torch.manual_seed(random_seed)
-        env.seed(random_seed)
+        #env.seed(random_seed)
         np.random.seed(random_seed)
     #####################################################
 
@@ -167,10 +175,12 @@ def train():
     # training loop
     while time_step <= max_training_timesteps:
 
-        state = env.reset()
+        state = env.reset(None)
         current_ep_reward = 0
 
         for t in range(1, max_ep_len+1):
+
+            print(time.time())
 
             # select action with policy
             action = ppo_agent.select_action(state)
