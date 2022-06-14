@@ -2,17 +2,10 @@ import os
 import glob
 import time
 from datetime import datetime
-
 import torch
 import numpy as np
-
-#import gym
-#import roboschool
-
 from PPO import PPO
-
-from Pendulum_v3 import *  # added by Ben
-import matplotlib.pyplot as plt
+from Pendulum_v3_mirror import *  # added by Ben
 
 
 ################################### Training ###################################

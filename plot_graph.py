@@ -1,6 +1,12 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import argparse
+
+
+parser = argparse.ArgumentParser(description="")
+parser.add_argument("--trial", type=int, default=0, help="trial")
+args = parser.parse_args()
 
 
 def save_graph():
@@ -30,19 +36,19 @@ def save_graph():
     colors = ['red', 'blue', 'green', 'orange', 'purple', 'olive', 'brown', 'magenta', 'cyan', 'crimson','gray', 'black']
 
     # make directory for saving figures
-    figures_dir = "PPO_figs"
+    figures_dir = "runs"
     if not os.path.exists(figures_dir):
         os.makedirs(figures_dir)
 
     # make environment directory for saving figures
-    figures_dir = figures_dir + '/' + env_name + '/'
+    figures_dir = figures_dir + f'/rwip{args.trial}/fig/'
     if not os.path.exists(figures_dir):
         os.makedirs(figures_dir)
 
-    fig_save_path = figures_dir + '/PPO_' + env_name + '_fig_' + str(fig_num) + '.png'
+    fig_save_path = figures_dir + 'PPO_fig.png'
 
     # get number of log files in directory
-    log_dir = "PPO_logs" + '/' + env_name + '/'
+    log_dir = 'runs/' + f'rwip{args.trial}' + '/log'
 
     current_num_files = next(os.walk(log_dir))[2]
     num_runs = len(current_num_files)
@@ -51,7 +57,7 @@ def save_graph():
 
     for run_num in range(num_runs):
 
-        log_f_name = log_dir + '/PPO_' + env_name + "_log_" + str(run_num) + ".csv"
+        log_f_name = log_dir + f'/PPO_log_{run_num}.csv'
         print("loading data from : " + log_f_name)
         data = pd.read_csv(log_f_name)
         data = pd.DataFrame(data)
@@ -108,7 +114,7 @@ def save_graph():
     ax.set_xlabel("Timesteps", fontsize=12)
     ax.set_ylabel("Rewards", fontsize=12)
 
-    plt.title(env_name, fontsize=14)
+    plt.title("PPO " + env_name, fontsize=14)
 
     fig = plt.gcf()
     fig.set_size_inches(fig_width, fig_height)
