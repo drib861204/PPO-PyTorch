@@ -10,11 +10,16 @@ import matplotlib.pyplot as plt
 import argparse
 
 
+parser = argparse.ArgumentParser(description="")
+parser.add_argument("--trial", type=int, default=0, help="trial")
+parser.add_argument("-seed", type=int, default=0, help="Seed for the env and torch network weights, default is 0")
+args = parser.parse_args()
+
+
 def transient_response(eval_env, state_action_log):
-    #print(np.shape(state_action_log)[0])
     fig, axs = plt.subplots(4)
-    fig.suptitle('SAC Transient Response')
-    t = np.arange(0, eval_env.dt*np.shape(state_action_log)[0], eval_env.dt)
+    fig.suptitle('PPO Transient Response')
+    t = np.linspace(0, eval_env.dt*(state_action_log.shape[0]-1), state_action_log.shape[0])
     axs[0].plot(t[1:], state_action_log[1:,0])
     axs[3].plot(t[1:], state_action_log[1:,1])
     axs[1].plot(t[1:], state_action_log[1:,2])
@@ -28,6 +33,7 @@ def transient_response(eval_env, state_action_log):
     #axs[0].set_ylim([-pi-0.5,pi+0.5])
     axs[1].set_ylim([-34,34])
     #axs[2].set_ylim([-12,12])
+    plt.savefig(f"runs/rwip{args.trial}/fig/response{args.seed}")
     plt.show()
 
     print("e_ss=",state_action_log[-1,0])
@@ -132,11 +138,11 @@ def test():
 
     # preTrained weights directory
 
-    random_seed = 0             #### set this to load a particular checkpoint trained on random seed
+    random_seed = args.seed             #### set this to load a particular checkpoint trained on random seed
     run_num_pretrained = 0      #### set this to load a particular checkpoint num
 
-    directory = "PPO_preTrained" + '/' + env_name + '/'
-    checkpoint_path = directory + "PPO_{}_{}_{}.pth".format(env_name, random_seed, run_num_pretrained)
+    directory = f"runs/rwip{args.trial}/"
+    checkpoint_path = directory + f"rwip{args.trial}_{random_seed}.pth"
     print("loading network from : " + checkpoint_path)
 
     ppo_agent.load(checkpoint_path)
@@ -171,7 +177,7 @@ def test():
         # clear buffer
         ppo_agent.buffer.clear()
 
-        test_running_reward +=  ep_reward
+        test_running_reward += ep_reward
         print('Episode: {} \t\t Reward: {}'.format(ep, round(ep_reward, 2)))
         ep_reward = 0
 
