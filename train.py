@@ -6,6 +6,13 @@ import torch
 import numpy as np
 from PPO import PPO
 from Pendulum_v3_mirror import *  # added by Ben
+import argparse
+
+
+parser = argparse.ArgumentParser(description="")
+parser.add_argument("--trial", type=int, default=0, help="trial")
+parser.add_argument("-seed", type=int, default=0, help="Seed for the env and torch network weights, default is 0")
+args = parser.parse_args()
 
 
 ################################### Training ###################################
@@ -23,7 +30,7 @@ def train():
 
     print_freq = max_ep_len * 10        # print avg reward in the interval (in num timesteps)
     log_freq = max_ep_len * 2           # log avg reward in the interval (in num timesteps)
-    save_model_freq = int(1e5)          # save model frequency (in num timesteps)
+    save_model_freq = int(1e3)          # save model frequency (in num timesteps)
 
     action_std = 0.6                    # starting std for action distribution (Multivariate Normal)
     action_std_decay_rate = 0.05        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
@@ -43,7 +50,7 @@ def train():
     lr_actor = 0.0003       # learning rate for actor network
     lr_critic = 0.001       # learning rate for critic network
 
-    random_seed = 0         # set random seed if required (0 = no random seed)
+    random_seed = args.seed         # set random seed if required (0 = no random seed)
     #####################################################
 
     #print("training environment name : " + env_name)
@@ -63,13 +70,13 @@ def train():
     ###################### logging ######################
 
     #### log files for multiple runs are NOT overwritten
-    log_dir = "PPO_logs"
+    log_dir = f"runs/rwip{args.trial}/log"
     if not os.path.exists(log_dir):
           os.makedirs(log_dir)
 
-    log_dir = log_dir + '/' + env_name + '/'
+    '''log_dir = log_dir + '/' + env_name + '/'
     if not os.path.exists(log_dir):
-          os.makedirs(log_dir)
+          os.makedirs(log_dir)'''
 
     #### get number of log files in log directory
     run_num = 0
@@ -77,7 +84,7 @@ def train():
     run_num = len(current_num_files)
 
     #### create new log file for each run
-    log_f_name = log_dir + '/PPO_' + env_name + "_log_" + str(run_num) + ".csv"
+    log_f_name = log_dir + f"/PPO_log_{run_num}.csv"
 
     print("current logging run number for " + env_name + " : ", run_num)
     print("logging at : " + log_f_name)
@@ -86,18 +93,18 @@ def train():
     ################### checkpointing ###################
     run_num_pretrained = 0      #### change this to prevent overwriting weights in same env_name folder
 
-    directory = "PPO_preTrained"
+    directory = f"runs/rwip{args.trial}/"
     if not os.path.exists(directory):
           os.makedirs(directory)
 
-    directory = directory + '/' + env_name + '/'
+    '''directory = directory + '/' + env_name + '/'
     if not os.path.exists(directory):
-          os.makedirs(directory)
+          os.makedirs(directory)'''
 
-    current_num_files = next(os.walk(directory))[2]
-    run_num_pretrained = len(current_num_files)
+    #current_num_files = next(os.walk(directory))[2]
+    #run_num_pretrained = len(current_num_files)
 
-    checkpoint_path = directory + "PPO_{}_{}_{}.pth".format(env_name, random_seed, run_num_pretrained)
+    checkpoint_path = directory + f"rwip{args.trial}_{random_seed}.pth"
     print("save checkpoint path : " + checkpoint_path)
     #####################################################
 
@@ -130,7 +137,7 @@ def train():
     print("--------------------------------------------------------------------------------------------")
     print("optimizer learning rate actor : ", lr_actor)
     print("optimizer learning rate critic : ", lr_critic)
-    if random_seed:
+    if True: #random_seed:
         print("--------------------------------------------------------------------------------------------")
         print("setting random seed to ", random_seed)
         torch.manual_seed(random_seed)
@@ -173,7 +180,7 @@ def train():
 
         for t in range(1, max_ep_len+1):
 
-            print(time.time())
+            #print(time.time())
 
             # select action with policy
             action = ppo_agent.select_action(state)
