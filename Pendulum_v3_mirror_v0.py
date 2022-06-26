@@ -21,12 +21,7 @@ from gym import spaces, logger
 
 
 class Pendulum(gym.Env):
-    def __init__(self, rend, w_q1):
-        #self.frames = frames
-        #self.interval_num = interval_num
-        #self.cur_case = 1
-        #self.weight_tau = w_tau
-        self.w_q1 = w_q1
+    def __init__(self, rend):
 
         self.theta_rod = 0
         self.theta_wheel = 0
@@ -56,7 +51,9 @@ class Pendulum(gym.Env):
         self.max_q1 = 5*pi/180 # stop training below this angle
         self.max_q1dot = 1 #initial q1_dot default 0.3? to be verified
 
-        self.wheel_max_speed = 28
+        #self.wheel_max_speed = 20
+        self.wheel_max_speed = 30 # not fixed
+        #self.max_torque = 20
         self.max_torque = 21
 
         self.torque = 0
@@ -90,20 +87,17 @@ class Pendulum(gym.Env):
             #print("font")
 
 
-    def reset(self, saved, avg_reward=-1000):
+    def reset(self, saved, curriculum_numerator=1000):
         # self.state is for render, self.agent_state is for training
 
-        self.ang = 2*pi/180 # reset angle
-        self.low_ang = 0 # random lower bound
+        self.ang = 1*pi/180 # reset angle
+
+        '''curriculum_denominator = 15
+        if curriculum_numerator < curriculum_denominator:
+            self.ang = self.ang * curriculum_numerator / curriculum_denominator'''
 
         if saved == None:
-            #interval = self.frames//self.interval_num
-            '''if avg_reward > -50:
-                self.cur_case += 1
-            self.ang *= (self.cur_case)/self.interval_num
-            #print(interval, self.ang)'''
-
-            reset_angle_random = np.random.uniform(low=self.low_ang, high=self.ang)
+            reset_angle_random = np.random.uniform(low=-self.ang, high=self.ang)
             #reset_high = np.array([self.ang, self.max_q1dot, self.wheel_max_speed])
             #self.state = np.random.uniform(low=-reset_high, high=reset_high)
             self.state = np.array([reset_angle_random, 0, 0], dtype=np.float32)
@@ -196,8 +190,8 @@ class Pendulum(gym.Env):
             self.agent_state = (-self.state[0], -self.state[1], -self.state[2])
 
         done = bool(
-            q1 < -self.ang
-            or q1 > self.ang
+            q1 < -self.max_q1
+            or q1 > self.max_q1
         )
             #or q1_dot < -self.max_q1dot
             #or q1_dot > self.max_q1dot
@@ -210,11 +204,9 @@ class Pendulum(gym.Env):
 
         # costs = 100 * q1 ** 2
         # costs = q1_dot ** 2
-        costs = self.w_q1 * q1 ** 2 + 1 * q1_dot ** 2
+        costs = 100 * q1 ** 2 + 1 * q1_dot ** 2
         # costs = 100 * q1 ** 2 + 1 * q1_dot ** 2 + 0.0001 * (self.last_torque - torque) ** 2
-        # costs = 100 * q1 ** 2 + 1 * q1_dot ** 2 + 0.0001 * (self.last_torque - torque) ** 2 + self.weight_speed * q2_dot**2
-        # costs = 100 * q1 ** 2 + 1 * q1_dot ** 2 + 0.0001 * (self.last_torque - torque) ** 2 + self.weight_tau * torque**2
-        # costs = 100 * q1 ** 2 + 1 * q1_dot ** 2 + self.weight_tau * torque ** 2
+        # costs = 1000 * q1 ** 2 + 0.1 * q1_dot ** 2 + 0.001 * torque ** 2
         # costs = 1000 * q1 ** 2 + 0.1 * q1_dot ** 2 + 0.001 * torque ** 2 + 0.00001 * q2_dot**2
         # costs = 100 * q1 ** 2 + 0.00001 * q2_dot ** 2
         # costs = 100 * q1 ** 2 + 1 * q1_dot ** 2 + 100 * torque ** 2 + 0.001 * q2_dot ** 2
