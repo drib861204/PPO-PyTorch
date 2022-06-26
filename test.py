@@ -11,8 +11,9 @@ import argparse
 
 
 parser = argparse.ArgumentParser(description="")
-parser.add_argument("--trial", type=int, default=0, help="trial")
+parser.add_argument("-trial", type=int, default=0, help="trial")
 parser.add_argument("-seed", type=int, default=0, help="Seed for the env and torch network weights, default is 0")
+parser.add_argument("-w_q1", type=int, default=1e5, help="q1 weight")
 args = parser.parse_args()
 
 
@@ -34,7 +35,7 @@ def transient_response(eval_env, state_action_log):
     axs[1].set_ylim([-34,34])
     #axs[2].set_ylim([-12,12])
     plt.savefig(f"runs/rwip{args.trial}/fig/response{args.seed}")
-    plt.show()
+    #plt.show()
 
     print("e_ss=",state_action_log[-1,0])
     print("u_ss=",state_action_log[-1,3]*eval_env.max_torque)
@@ -107,10 +108,10 @@ def test():
     max_ep_len = 1000           # max timesteps in one episode
     action_std = 0.1            # set same std for action distribution which was used while saving
 
-    render = True              # render environment on screen
+    render = False              # render environment on screen
     frame_delay = 0             # if required; add delay b/w frames
 
-    total_test_episodes = 10    # total num of testing episodes
+    total_test_episodes = 1    # total num of testing episodes
 
     K_epochs = 80               # update policy for K epochs
     eps_clip = 0.2              # clip parameter for PPO
@@ -122,7 +123,9 @@ def test():
     #####################################################
 
     #env = gym.make(env_name)
-    env = Pendulum(1)
+    env = Pendulum(render, args.w_q1)
+    time_duration = 5  # second
+    max_ep_len = int(time_duration/env.dt)
 
     # state space dimension
     state_dim = env.observation_space.shape[0]
@@ -159,10 +162,14 @@ def test():
 
         for t in range(1, max_ep_len+1):
             action = ppo_agent.select_action(state)
+            if state[2] >= env.wheel_max_speed or state[2] <= -env.wheel_max_speed:
+                action = np.array([0])
             state, reward, done, _ = env.step(action)
+            state_for_render = env.state
+
             ep_reward += reward
 
-            state_action = np.append(state, action[0])
+            state_action = np.append(state_for_render, action[0])
             state_action_log = np.concatenate((state_action_log,np.asmatrix(state_action)),axis=0)
 
             if render:

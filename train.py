@@ -161,17 +161,17 @@ def train():
 
     # logging file
     log_f = open(log_f_name,"w+")
-    log_f.write('episode,timestep,reward\n')
+    log_f.write('episode,timestep,raw_reward\n')
 
     # printing and logging variables
-    print_running_reward = 0
+    '''print_running_reward = 0
     print_running_episodes = 0
 
     log_running_reward = 0
-    log_running_episodes = 0
+    log_running_episodes = 0'''
 
     time_step = 0
-    i_episode = 0
+    i_episode = 1
 
     # training loop
     while time_step <= max_training_timesteps:
@@ -205,7 +205,7 @@ def train():
                 ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)
 
             # log in logging file
-            if time_step % log_freq == 0:
+            '''if time_step % log_freq == 0:
 
                 # log average reward till last episode
                 log_avg_reward = log_running_reward / log_running_episodes
@@ -215,10 +215,10 @@ def train():
                 log_f.flush()
 
                 log_running_reward = 0
-                log_running_episodes = 0
+                log_running_episodes = 0'''
 
             # printing average reward
-            if time_step % print_freq == 0:
+            '''if time_step % print_freq == 0:
 
                 # print average reward till last episode
                 print_avg_reward = print_running_reward / print_running_episodes
@@ -227,26 +227,30 @@ def train():
                 print("Episode : {} \t\t Timestep : {} \t\t Average Reward : {}".format(i_episode, time_step, print_avg_reward))
 
                 print_running_reward = 0
-                print_running_episodes = 0
+                print_running_episodes = 0'''
 
             # save model weights
-            if time_step % save_model_freq == 0:
+            '''if time_step % save_model_freq == 0:
                 print("--------------------------------------------------------------------------------------------")
                 print("saving model at : " + checkpoint_path)
                 ppo_agent.save(checkpoint_path)
                 print("model saved")
                 print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
-                print("--------------------------------------------------------------------------------------------")
+                print("--------------------------------------------------------------------------------------------")'''
 
             # break; if the episode is over
-            if done:
+            if done or t >= max_ep_len:
+                ppo_agent.save(checkpoint_path)
+                print("Episode : {} \t\t Timestep : {} \t\t Episode Reward : {}".format(i_episode, time_step, current_ep_reward))
+                log_f.write('{},{},{}\n'.format(i_episode, time_step, current_ep_reward))
+                log_f.flush()
                 break
 
-        print_running_reward += current_ep_reward
+        '''print_running_reward += current_ep_reward
         print_running_episodes += 1
 
         log_running_reward += current_ep_reward
-        log_running_episodes += 1
+        log_running_episodes += 1'''
 
         i_episode += 1
 

@@ -23,7 +23,7 @@ def save_graph():
     fig_height = 6
 
     # smooth out rewards to get a smooth and a less smooth (var) plot lines
-    window_len_smooth = 20
+    window_len_smooth = 30 #20
     min_window_len_smooth = 1
     linewidth_smooth = 1.5
     alpha_smooth = 1
@@ -45,7 +45,10 @@ def save_graph():
     if not os.path.exists(figures_dir):
         os.makedirs(figures_dir)
 
-    fig_save_path = figures_dir + 'PPO_fig.png'
+    current_num_files = next(os.walk(figures_dir))[2]
+    num_runs = len(current_num_files)
+
+    fig_save_path = figures_dir + f'PPO_fig_{num_runs}.png'
 
     # get number of log files in directory
     log_dir = 'runs/' + f'rwip{args.trial}' + '/log'
