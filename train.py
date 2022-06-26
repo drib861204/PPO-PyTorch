@@ -181,7 +181,7 @@ def train():
 
         for t in range(1, max_ep_len+1):
 
-            print(time.time())
+            #print(time.time())
 
             # select action with policy
             action = ppo_agent.select_action(state)
