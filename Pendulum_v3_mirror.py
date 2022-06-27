@@ -181,10 +181,14 @@ class Pendulum(gym.Env):
         Ip = self.Ip
         a = self.mbarg*sin(q1)
 
-        q1_dot = q1_dot + ((a-torque)/(Ip-I2))*dt
+        if abs(q2_dot) > self.wheel_max_speed:
+            pass
+            #q1_dot = q1_dot
+            #q2_dot = q2_dot
+        else:
+            q1_dot = q1_dot + ((a-torque)/(Ip-I2))*dt
+            q2_dot = q2_dot + ((torque*Ip-a*I2)/I2/(Ip-I2))*dt
         q1 = angle_normalize(q1 + q1_dot * dt)
-
-        q2_dot = q2_dot + ((torque*Ip-a*I2)/I2/(Ip-I2))*dt
         #q2_dot = np.clip(q2_dot, -self.wheel_max_speed, self.wheel_max_speed)
         q2 = angle_normalize(angle_normalize(q2) + q2_dot * dt)
 

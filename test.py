@@ -162,8 +162,8 @@ def test():
 
         for t in range(1, max_ep_len+1):
             action = ppo_agent.select_action(state)
-            if state[2] >= env.wheel_max_speed or state[2] <= -env.wheel_max_speed:
-                action = np.array([0])
+            #if state[2] >= env.wheel_max_speed or state[2] <= -env.wheel_max_speed:
+            #    action = np.array([0])
             state, reward, done, _ = env.step(action)
             state_for_render = env.state
 

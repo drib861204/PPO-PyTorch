@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser(description="")
 parser.add_argument("-trial", type=int, default=0, help="trial")
 parser.add_argument("-seed", type=int, default=0, help="Seed for the env and torch network weights, default is 0")
 parser.add_argument("-frames", type=int, default=1e5, help="frames")
-parser.add_argument("-w_q1", type=int, default=1e5, help="q1 weight")
+parser.add_argument("-w_q1", type=int, default=10, help="q1 weight")
 args = parser.parse_args()
 
 
@@ -27,7 +27,7 @@ def train():
 
     has_continuous_action_space = True  # continuous action space; else discrete
 
-    max_ep_len = 1000 #500                    # max timesteps in one episode
+    max_ep_len = 500                    # max timesteps in one episode
     max_training_timesteps = args.frames #int(3e6)   # break training loop if timeteps > max_training_timesteps
 
     print_freq = max_ep_len * 10        # print avg reward in the interval (in num timesteps)
@@ -185,9 +185,10 @@ def train():
 
             # select action with policy
             action = ppo_agent.select_action(state)
-            if state[2] >= env.wheel_max_speed or state[2] <= -env.wheel_max_speed:
-                action = np.array([0])
+            #if state[2] >= env.wheel_max_speed or state[2] <= -env.wheel_max_speed:
+            #    action = np.array([0])
             state, reward, done, _ = env.step(action)
+            #print(state[2], action)
 
             # saving reward and is_terminals
             ppo_agent.buffer.rewards.append(reward)

@@ -167,12 +167,19 @@ class PPO:
             print("WARNING : Calling PPO::decay_action_std() on discrete action space policy")
         print("--------------------------------------------------------------------------------------------")
 
-    def select_action(self, state):
+    def select_action(self, state, wheel_max_speed):
 
         if self.has_continuous_action_space:
             with torch.no_grad():
                 state = torch.FloatTensor(state).to(device)
                 action, action_logprob = self.policy_old.act(state)
+
+                '''if state[2] >= wheel_max_speed or state[2] <= -wheel_max_speed:
+                    action = np.array([0])
+                    action_logprob = np.array([1])
+                    print("state 2", state[2])
+                print("action: ", action, type(action))
+                print("action_logprob: ", action_logprob, type(action_logprob))'''
 
             self.buffer.states.append(state)
             self.buffer.actions.append(action)
