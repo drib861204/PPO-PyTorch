@@ -175,7 +175,7 @@ def train():
 
     time_step = 0
     i_episode = 1
-    scores_window = deque(maxlen=20)
+    scores_window = deque(maxlen=30)
 
     # training loop
     while time_step <= max_training_timesteps:
