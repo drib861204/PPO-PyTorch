@@ -7,6 +7,7 @@ import numpy as np
 from PPO import PPO
 from Pendulum_v3_mirror import *  # added by Ben
 import argparse
+from collections import deque
 
 
 parser = argparse.ArgumentParser(description="")
@@ -14,6 +15,8 @@ parser.add_argument("-trial", type=int, default=0, help="trial")
 parser.add_argument("-seed", type=int, default=0, help="Seed for the env and torch network weights, default is 0")
 parser.add_argument("-frames", type=int, default=1e5, help="frames")
 parser.add_argument("-w_q1", type=int, default=10, help="q1 weight")
+parser.add_argument("-lr_a", type=float, default=0.0003, help="learning rate for actor network")
+parser.add_argument("-lr_c", type=float, default=0.001, help="learning rate for critic network")
 args = parser.parse_args()
 
 
@@ -49,8 +52,8 @@ def train():
     eps_clip = 0.2          # clip parameter for PPO
     gamma = 0.99            # discount factor
 
-    lr_actor = 0.0003       # learning rate for actor network
-    lr_critic = 0.001       # learning rate for critic network
+    lr_actor = args.lr_a #0.0003       # learning rate for actor network
+    lr_critic = args.lr_c #0.001       # learning rate for critic network
 
     random_seed = args.seed         # set random seed if required (0 = no random seed)
     #####################################################
@@ -58,7 +61,7 @@ def train():
     #print("training environment name : " + env_name)
 
     #env = gym.make(env_name)
-    env = Pendulum(0, args.w_q1)
+    env = Pendulum(0)
 
     # state space dimension
     state_dim = env.observation_space.shape[0]
@@ -172,9 +175,13 @@ def train():
 
     time_step = 0
     i_episode = 1
+    scores_window = deque(maxlen=20)
 
     # training loop
     while time_step <= max_training_timesteps:
+
+        if np.mean(scores_window) > -10:
+            break
 
         state = env.reset(None)
         current_ep_reward = 0
@@ -242,6 +249,7 @@ def train():
             # break; if the episode is over
             if done or t >= max_ep_len:
                 ppo_agent.save(checkpoint_path)
+                scores_window.append(current_ep_reward)
                 print("Episode : {} \t\t Timestep : {} \t\t Episode Reward : {}".format(i_episode, time_step, current_ep_reward))
                 log_f.write('{},{},{}\n'.format(i_episode, time_step, current_ep_reward))
                 log_f.flush()

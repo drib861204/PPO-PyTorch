@@ -21,12 +21,12 @@ from gym import spaces, logger
 
 
 class Pendulum(gym.Env):
-    def __init__(self, rend, w_q1):
+    def __init__(self, rend):
         #self.frames = frames
         #self.interval_num = interval_num
         #self.cur_case = 1
         #self.weight_tau = w_tau
-        self.w_q1 = w_q1
+        #self.w_q1 = w_q1
 
         self.theta_rod = 0
         self.theta_wheel = 0
@@ -94,7 +94,7 @@ class Pendulum(gym.Env):
         # self.state is for render, self.agent_state is for training
 
         self.ang = 2*pi/180 # reset angle
-        self.low_ang = 0 # random lower bound
+        #self.low_ang = 0 # random lower bound
 
         if saved == None:
             #interval = self.frames//self.interval_num
@@ -103,7 +103,7 @@ class Pendulum(gym.Env):
             self.ang *= (self.cur_case)/self.interval_num
             #print(interval, self.ang)'''
 
-            reset_angle_random = np.random.uniform(low=self.low_ang, high=self.ang)
+            reset_angle_random = np.random.uniform(low=-self.ang, high=self.ang)
             #reset_high = np.array([self.ang, self.max_q1dot, self.wheel_max_speed])
             #self.state = np.random.uniform(low=-reset_high, high=reset_high)
             self.state = np.array([reset_angle_random, 0, 0], dtype=np.float32)
@@ -214,7 +214,7 @@ class Pendulum(gym.Env):
 
         # costs = 100 * q1 ** 2
         # costs = q1_dot ** 2
-        costs = self.w_q1 * q1 ** 2 + 1 * q1_dot ** 2
+        costs = 100 * q1 ** 2 + 1 * q1_dot ** 2
         # costs = 100 * q1 ** 2 + 1 * q1_dot ** 2 + 0.0001 * (self.last_torque - torque) ** 2
         # costs = 100 * q1 ** 2 + 1 * q1_dot ** 2 + 0.0001 * (self.last_torque - torque) ** 2 + self.weight_speed * q2_dot**2
         # costs = 100 * q1 ** 2 + 1 * q1_dot ** 2 + 0.0001 * (self.last_torque - torque) ** 2 + self.weight_tau * torque**2

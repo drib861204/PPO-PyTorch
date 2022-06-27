@@ -123,7 +123,7 @@ def test():
     #####################################################
 
     #env = gym.make(env_name)
-    env = Pendulum(render, args.w_q1)
+    env = Pendulum(render)
     time_duration = 5  # second
     max_ep_len = int(time_duration/env.dt)
 
