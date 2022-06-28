@@ -175,13 +175,13 @@ def train():
 
     time_step = 0
     i_episode = 1
-    scores_window = deque(maxlen=30)
+    #scores_window = deque(maxlen=args.scores_window_len)
 
     # training loop
     while time_step <= max_training_timesteps:
 
-        if np.mean(scores_window) > -10:
-            break
+        #if np.mean(scores_window) > -10:
+        #    break
 
         state = env.reset(None)
         current_ep_reward = 0
@@ -249,7 +249,7 @@ def train():
             # break; if the episode is over
             if done or t >= max_ep_len:
                 ppo_agent.save(checkpoint_path)
-                scores_window.append(current_ep_reward)
+                #scores_window.append(current_ep_reward)
                 print("Episode : {} \t\t Timestep : {} \t\t Episode Reward : {}".format(i_episode, time_step, current_ep_reward))
                 log_f.write('{},{},{}\n'.format(i_episode, time_step, current_ep_reward))
                 log_f.flush()

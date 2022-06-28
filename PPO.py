@@ -174,13 +174,6 @@ class PPO:
                 state = torch.FloatTensor(state).to(device)
                 action, action_logprob = self.policy_old.act(state)
 
-                '''if state[2] >= wheel_max_speed or state[2] <= -wheel_max_speed:
-                    action = np.array([0])
-                    action_logprob = np.array([1])
-                    print("state 2", state[2])
-                print("action: ", action, type(action))
-                print("action_logprob: ", action_logprob, type(action_logprob))'''
-
             self.buffer.states.append(state)
             self.buffer.actions.append(action)
             self.buffer.logprobs.append(action_logprob)
